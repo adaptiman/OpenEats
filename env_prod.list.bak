@@ -10,7 +10,6 @@ DJANGO_SETTINGS_MODULE=base.settings
 DJANGO_DEBUG=False
 #ALLOWED_HOST=sweeneydev.southcentralus.cloudapp.azure.com
 ALLOWED_HOST=www.cookbook.thesweeneys.org
-#ALLOWED_HOST=20.1.138.24
 HTTP_X_FORWARDED_PROTO=true
 
 # Node config
@@ -18,5 +17,4 @@ NODE_ENV=production
 NODE_URL=localhost:8080
 #NODE_API_URL=http://sweeneydev.southcentralus.cloudapp.azure.com:80
 NODE_API_URL=https://www.cookbook.thesweeneys.org
-#NODE_API_URL=https://20.1.138.24
 NODE_LOCALE=en
