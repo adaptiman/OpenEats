@@ -21,11 +21,15 @@ services:
     env_file:
       env_prod.list
   db:
-    image: mariadb:5.5.64
+    image: mariadb@sha256:b3af559fc38e013c50dd5b5993bfbbb21125c1a62d976b3b0a14d9c4acaae578
+    command:
+      - --character-set-server=latin1
+      - --collation-server=latin1_swedish_ci
+      - --sql-mode=
     volumes:
-      - database:/var/lib/mysql
+      - database-current:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      test: ["CMD", "mariadb-admin" ,"ping", "-h", "localhost"]
       timeout: 20s
       retries: 20
     env_file:
@@ -44,6 +48,8 @@ services:
       env_prod.list
 volumes:
   database:
+  database-current:
+    name: openeats_database_current
   public-ui:
   static-files:
   site-media:
