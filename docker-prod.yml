@@ -44,7 +44,7 @@ services:
     image: adaptiman/openeats-nginx
     command: ./start.sh
     healthcheck:
-      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/"]
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 80"]
       interval: 30s
       timeout: 10s
       retries: 5
