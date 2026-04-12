@@ -19,3 +19,4 @@ secrets/*
 *.log
 *.pyc
 *.sql
+*.bak
