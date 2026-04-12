@@ -1,6 +1,6 @@
 services:
   api:
-    image: adaptiman/openeats-api:stage2-20260412
+    image: adaptiman/openeats-api:stage3a-20260412
   web:
     image: adaptiman/openeats-web@sha256:3a44802429bb4465ed4a7b64bd9ac199a8159adfa0f60fbcbe38d6a977eefd61
   nginx:

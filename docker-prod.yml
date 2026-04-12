@@ -19,7 +19,7 @@ services:
       env_prod.list
   web:
     image: adaptiman/openeats-web
-    command: yarn start
+    command: yarn build
     depends_on:
       - api
     volumes:
