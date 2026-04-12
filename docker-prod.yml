@@ -3,6 +3,12 @@ services:
     image: adaptiman/openeats-api
     command: /startup/prod-entrypoint.sh
     restart: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:443/api/v1/recipe/recipes/?limit=1', timeout=8)\""]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
     volumes:
       - static-files:/code/static-files
       - site-media:/code/site-media
@@ -37,6 +43,12 @@ services:
   nginx:
     image: adaptiman/openeats-nginx
     command: ./start.sh
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
     volumes:
       - static-files:/var/www/html/openeats-static/static-files
       - site-media:/var/www/html/openeats-static/site-media
