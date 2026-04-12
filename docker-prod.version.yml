@@ -1,8 +1,7 @@
-version: '2.3'
 services:
   api:
-    image: adaptiman/openeats-api:latest
+    image: adaptiman/openeats-api@sha256:0708a8b232dbd11a720e07bc171b663eb1038cb5ea9249a2c1f695d71c61e8c2
   web:
-    image: adaptiman/openeats-web:latest
+    image: adaptiman/openeats-web@sha256:3a44802429bb4465ed4a7b64bd9ac199a8159adfa0f60fbcbe38d6a977eefd61
   nginx:
-    image: adaptiman/openeats-nginx:latest
+    image: adaptiman/openeats-nginx@sha256:20242de2bd0856ef5acaf6c37384233dada7a5a25650b2dfd4e23849d35688ae
