@@ -20,3 +20,4 @@ secrets/*
 *.pyc
 *.sql
 *.bak
+ops/local/backup-openeats.sh
