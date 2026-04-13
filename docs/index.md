@@ -27,6 +27,8 @@ Normal users just have the ability to add recipes. Below are a few of the core f
 
 ### [The Update guide can be found here!](https://github.com/open-eats/OpenEats/blob/master/docs/Updating_the_App.md)
 
+### [Restore from backup runbook](https://github.com/open-eats/OpenEats/blob/master/docs/Runbook_Restore_From_Backup_2026-04-13.md)
+
 # Contributing
 Please read the [contribution guidelines](https://github.com/open-eats/OpenEats/blob/master/CONTRIBUTING.md) in order to make the contribution process easy and effective for everyone involved.
 
