@@ -16,7 +16,7 @@ Having a registered domain name is required in order to acquire an SSL certifica
 
 ## Acquiring an SSL Certificate
 
-You can buy certificates from many vendors, but for non-commercial purposes, you can get a free SSL certificate from [Let's Encrypt](https://letsencrypt.org/). There is an outstanding tutorial on how to setup Nginx (i.e., the default web server for OpenEats) to work with [Let's Encrypt](https://letsencrypt.org/) published at [Human Code](https://www.humankode.com/ssl/how-to-set-up-free-ssl-certificates-from-lets-encrypt-using-docker-and-nginx). Follow the steps in this tutorial to setup and acquire your certificate. 
+You can buy certificates from many vendors, but for non-commercial purposes, you can get a free SSL certificate from [Let's Encrypt](https://letsencrypt.org/). There is an outstanding tutorial on how to setup Nginx (i.e., the default web server for OpenEats) to work with [Let's Encrypt](https://letsencrypt.org/) published at [Human Code](https://www.humankode.com/ssl/how-to-set-up-free-ssl-certificates-from-lets-encrypt-using-docker-and-nginx). Follow the steps in this tutorial to setup and acquire your certificate.
 
 Once your certificate is installed on your host, you will make some modifications to the [openeats-nginx](https://github.com/open-eats/openeats-nginx) application to build a custom [openeats-nginx](https://github.com/open-eats/openeats-nginx)  container that mounts the appropriate files. This will provide OpenEats access to the SSL certificate which should be located outside of the OpenEats containers (i.e., on you host machine). This is important because [Let's Encrypt](https://letsencrypt.org/) certificates are only valid for three months. Locating certificate files outside of your OpenEats containers makes it easier to renew them. A process for setting up an automatic renewal is detailed in the [Human Code](https://www.humankode.com/ssl/how-to-set-up-free-ssl-certificates-from-lets-encrypt-using-docker-and-nginx) tutorial.
 
@@ -34,10 +34,10 @@ At the time of this writing, there is a bug in the [openeats-api](https://github
 ```
 # original value:
 # MEDIA_URL = '/site-media/'
-# new value 
+# new value
 MEDIA_URL = 'https://www.my.domain.com/site-media/'
 ```
-Note that `www` should be included in the URL. You'll understand why in the next section. 
+Note that `www` should be included in the URL. You'll understand why in the next section.
 
 Once you make this change, you should use Docker to build the container and deploy it in your application.
 
