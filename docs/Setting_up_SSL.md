@@ -61,3 +61,59 @@ Then modify the copied files to match your domain.
 
 Also note that the `quick-start.py` file used to restart the application by default pulls from the latest OpenEats Docker images. You may wish to modify this file to reflect the new Docker images you've built to support SSL, whether they are located locally, or in a remote container repository.
 
+## Automating Certificate Renewal (Cron-Safe)
+
+### Why the old cron command fails
+
+If your certbot renewal command uses `docker run -it ...`, it may work manually in an SSH shell but fail in cron. Cron jobs are non-interactive and do not provide a TTY, so `-it` can fail with a message similar to:
+
+`cannot attach stdin to a TTY-enabled container because stdin is not a terminal`
+
+### Recommended approach
+
+Use a small shell script with explicit docker paths and no `-it`, then call that script from cron.
+
+Example script path:
+
+`/home/adaptiman/certbot-renew-openeats.sh`
+
+Example script contents:
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+LOG_FILE="/home/adaptiman/OpenEats/ops/local/certbot-renew.log"
+
+{
+	date -u '+[%Y-%m-%dT%H:%M:%SZ] Starting certbot renew'
+
+	/usr/bin/docker run --rm --name certbot \
+		-v "/docker-volumes/etc/letsencrypt:/etc/letsencrypt" \
+		-v "/docker-volumes/var/lib/letsencrypt:/var/lib/letsencrypt" \
+		-v "/docker-volumes/data/letsencrypt:/data/letsencrypt" \
+		-v "/docker-volumes/var/log/letsencrypt:/var/log/letsencrypt" \
+		certbot/certbot renew --webroot -w /data/letsencrypt --quiet
+
+	/usr/bin/docker kill --signal=HUP openeats-nginx-1
+	date -u '+[%Y-%m-%dT%H:%M:%SZ] Certbot renew completed and nginx reloaded'
+} >> "$LOG_FILE" 2>&1
+```
+
+Make it executable:
+
+```bash
+chmod 755 /home/adaptiman/certbot-renew-openeats.sh
+```
+
+Use this cron entry:
+
+```cron
+0 3 * * * /home/adaptiman/certbot-renew-openeats.sh
+```
+
+### Notes
+
+- This renewal flow only reloads nginx (`HUP`) and does not require a full OpenEats restart.
+- Verify output in `/home/adaptiman/OpenEats/ops/local/certbot-renew.log`.
+
