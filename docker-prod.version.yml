@@ -1,6 +1,6 @@
 services:
   api:
-    image: adaptiman/openeats-api:stage5-20260413
+    image: adaptiman/openeats-api:stage5-webp-20260413
   web:
     image: adaptiman/openeats-web:stage5-20260413
   nginx:
