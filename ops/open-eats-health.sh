@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-COMPOSE_ARGS=(-f docker-prod.yml -f docker-prod.version.yml -f docker-prod.override.yml)
+COMPOSE_ARGS=(-f docker-compose.yml)
 
 cd "$ROOT_DIR"
 

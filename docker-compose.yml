@@ -1,38 +1,83 @@
-version: '2.3'
 services:
   api:
-    build: openeats-api/
-    command: python manage.py runserver 0.0.0.0:8000
+    build:
+      context: ../openeats-api
+    image: openeats-api:local
+    command: /startup/prod-entrypoint.sh
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:443/api/v1/recipe/recipes/?limit=1', timeout=8)\""]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
     env_file:
-      env_dev.list
+      env_prod.list
     volumes:
-      - ./openeats-api:/code
       - static-files:/code/static-files
       - site-media:/code/site-media
     depends_on:
-      - db
-    ports:
-      - "8000:8000"
+      db:
+        condition: service_healthy
   web:
-    build: openeats-web/
-    command: yarn dev
+    build:
+      context: ../openeats-web
+    image: openeats-web:local
+    command: yarn build
+    restart: on-failure
     env_file:
-      env_dev.list
+      env_prod.list
     volumes:
-      - ./openeats-web:/code
+      - public-ui:/code/build
     depends_on:
       - api
-    ports:
-      - "8080:8080"
   db:
-    image: mariadb
+    image: mariadb@sha256:b3af559fc38e013c50dd5b5993bfbbb21125c1a62d976b3b0a14d9c4acaae578
+    command:
+      - --character-set-server=latin1
+      - --collation-server=latin1_swedish_ci
+      - --sql-mode=
+    restart: always
+    healthcheck:
+      test: ["CMD", "mariadb-admin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 20
     env_file:
-      env_dev.list
+      env_prod.list
     volumes:
-      - database:/var/lib/mysql
+      - database-current:/var/lib/mysql
+  nginx:
+    build:
+      context: .
+      dockerfile: ops/nginx/Dockerfile
+    image: openeats-nginx:local
+    command: ./start.sh
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 80"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    env_file:
+      env_prod.list
+    volumes:
+      - static-files:/var/www/html/openeats-static/static-files
+      - site-media:/var/www/html/openeats-static/site-media
+      - public-ui:/var/www/html/openeats-static/public-ui
+      - /etc/ssl/certs/dhparam-2048.pem:/etc/ssl/certs/dhparam-2048.pem
+      - /docker-volumes/etc/letsencrypt:/etc/letsencrypt:ro
+      - ./ops/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - /docker-volumes/data/letsencrypt:/data/letsencrypt
+    depends_on:
+      - api
+      - web
     ports:
-      - "3306:3306"
+      - "80:80"
+      - "443:443"
 volumes:
-  database:
+  database-current:
+    name: openeats_database_current
+  public-ui:
   static-files:
   site-media:

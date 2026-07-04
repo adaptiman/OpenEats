@@ -84,6 +84,9 @@ Example script contents:
 set -euo pipefail
 
 LOG_FILE="/home/adaptiman/OpenEats/ops/local/certbot-renew.log"
+COMPOSE_FILE="/home/adaptiman/OpenEats/docker-compose.yml"
+DOMAIN="cookbook.thesweeneys.org"
+HOST_CERT="/docker-volumes/etc/letsencrypt/live/${DOMAIN}/fullchain.pem"
 
 {
 	date -u '+[%Y-%m-%dT%H:%M:%SZ] Starting certbot renew'
@@ -95,8 +98,19 @@ LOG_FILE="/home/adaptiman/OpenEats/ops/local/certbot-renew.log"
 		-v "/docker-volumes/var/log/letsencrypt:/var/log/letsencrypt" \
 		certbot/certbot renew --webroot -w /data/letsencrypt --quiet
 
-	/usr/bin/docker kill --signal=HUP openeats-nginx-1
-	date -u '+[%Y-%m-%dT%H:%M:%SZ] Certbot renew completed and nginx reloaded'
+	/usr/bin/docker compose -f "$COMPOSE_FILE" exec -T nginx nginx -s reload || \
+		/usr/bin/docker compose -f "$COMPOSE_FILE" up -d --no-deps nginx
+
+	if [[ -r "$HOST_CERT" ]]; then
+		/usr/bin/openssl x509 -in "$HOST_CERT" -noout -subject -issuer -dates \
+			| sed 's/^/[host-cert] /'
+	fi
+
+	echo | /usr/bin/openssl s_client -servername "$DOMAIN" -connect "$DOMAIN:443" 2>/dev/null \
+		| /usr/bin/openssl x509 -noout -subject -issuer -dates \
+		| sed 's/^/[served-cert] /' || true
+
+	date -u '+[%Y-%m-%dT%H:%M:%SZ] Certbot renew completed and nginx reload command issued'
 } >> "$LOG_FILE" 2>&1
 ```
 
@@ -114,6 +128,6 @@ Use this cron entry:
 
 ### Notes
 
-- This renewal flow only reloads nginx (`HUP`) and does not require a full OpenEats restart.
+- This renewal flow reloads nginx in place and falls back to service restart if needed.
 - Verify output in `/home/adaptiman/OpenEats/ops/local/certbot-renew.log`.
 

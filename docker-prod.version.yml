@@ -1,7 +1,5 @@
-services:
-  api:
-    image: adaptiman/openeats-api:stage5-webp-20260413
-  web:
-    image: adaptiman/openeats-web:stage5-card-actions-20260413
-  nginx:
-    image: adaptiman/openeats-nginx@sha256:20242de2bd0856ef5acaf6c37384233dada7a5a25650b2dfd4e23849d35688ae
+# Deprecated compatibility file.
+# Canonical deployment is docker-compose.yml with local builds.
+# Keep this file as a no-op so old multi-file compose commands still work.
+
+services: {}
