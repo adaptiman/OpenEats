@@ -1,0 +1,104 @@
+# OpenEats on the Mac mini (adapticlaw.local), behind the shared HTTPS entrance (Caddy, in
+# ~/adapticlaw-edge). See docs/Runbook_Move_to_Mac_mini.md.
+#
+# Differences from docker-compose.yml (the Azure VM):
+# - nginx serves plain HTTP inside Docker; Caddy terminates HTTPS and gets the certificates, so
+#   the Let's Encrypt, certbot and dhparam mounts are gone.
+# - nothing is published to the internet from here: nginx joins the external `edge` network that
+#   Caddy is on, and is published on 127.0.0.1:8088 only, for testing on the Mac mini itself.
+# - settings come from env_macmini.list (not committed; copy env_macmini.example.list).
+#
+#   docker compose -f docker-compose.macmini.yml up -d --build
+
+name: openeats
+
+services:
+  api:
+    build:
+      context: ../openeats-api
+    image: openeats-api:local
+    command: /startup/prod-entrypoint.sh
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:443/api/v1/recipe/recipes/?limit=1', timeout=8)\""]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    env_file:
+      env_macmini.list
+    volumes:
+      - static-files:/code/static-files
+      - site-media:/code/site-media
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ../openeats-web
+    image: openeats-web:local
+    command: yarn build
+    restart: on-failure
+    env_file:
+      env_macmini.list
+    volumes:
+      - public-ui:/code/build
+    depends_on:
+      - api
+
+  db:
+    image: mariadb@sha256:b3af559fc38e013c50dd5b5993bfbbb21125c1a62d976b3b0a14d9c4acaae578
+    command:
+      - --character-set-server=latin1
+      - --collation-server=latin1_swedish_ci
+      - --sql-mode=
+    restart: always
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 20
+    env_file:
+      env_macmini.list
+    volumes:
+      - database-current:/var/lib/mysql
+
+  nginx:
+    build:
+      context: .
+      dockerfile: ops/nginx/Dockerfile
+    image: openeats-nginx:local
+    command: ./start.sh
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 80"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    volumes:
+      - static-files:/var/www/html/openeats-static/static-files
+      - site-media:/var/www/html/openeats-static/site-media
+      - public-ui:/var/www/html/openeats-static/public-ui
+      - ./ops/nginx/macmini.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - api
+      - web
+    ports:
+      - "127.0.0.1:8088:80"   # testing on the Mac mini only; the internet reaches nginx through Caddy
+    networks:
+      default:
+      edge:
+        aliases:
+          - openeats-nginx
+
+networks:
+  edge:
+    external: true   # created once: docker network create edge
+
+volumes:
+  database-current:
+    name: openeats_database_current
+  public-ui:
+  static-files:
+  site-media:

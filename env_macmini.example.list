@@ -1,0 +1,26 @@
+# Settings for the Mac mini. Copy to env_macmini.list (not committed) and fill in the two secrets:
+#   cp env_macmini.example.list env_macmini.list && vi env_macmini.list
+# Generate fresh values; do not reuse the ones in env_prod.list (that file is public on GitHub):
+#   python3 -c "import secrets; print(secrets.token_urlsafe(48))"   # DJANGO_SECRET_KEY
+#   python3 -c "import secrets; print(secrets.token_urlsafe(24))"   # MYSQL_ROOT_PASSWORD
+
+# Database config. The root password only takes effect when the database volume is created,
+# which is why the move starts from an empty database and imports the SQL dump.
+MYSQL_DATABASE=openeats
+MYSQL_ROOT_PASSWORD=
+
+# Django config
+API_URL=0.0.0.0:443
+API_PORT=443
+DJANGO_SECRET_KEY=
+DJANGO_SETTINGS_MODULE=base.settings
+DJANGO_DEBUG=False
+ALLOWED_HOST=www.cookbook.thesweeneys.org,cookbook.thesweeneys.org
+HTTP_X_FORWARDED_PROTO=true
+
+# Node config. NODE_API_URL is left out on purpose: the web app then calls the API on whatever
+# address it was loaded from, so it works on http://localhost:8088 for testing and on
+# https://www.cookbook.thesweeneys.org in production.
+NODE_ENV=production
+NODE_URL=localhost:8080
+NODE_LOCALE=en

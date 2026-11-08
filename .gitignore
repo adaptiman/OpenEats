@@ -21,3 +21,6 @@ secrets/*
 *.sql
 *.bak
 ops/local/backup-openeats.sh
+
+# Mac mini settings (secrets)
+env_macmini.list
