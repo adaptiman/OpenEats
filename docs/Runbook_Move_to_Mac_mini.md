@@ -52,10 +52,10 @@ docker run --rm hello-world
 
 ```bash
 cd ~
-git clone https://github.com/adaptiman/OpenEats.git
-git clone https://github.com/adaptiman/openeats-api.git
-git clone https://github.com/adaptiman/openeats-web.git
-git clone https://github.com/adaptiman/adapticlaw-edge.git
+git clone git@github.com:adaptiman/OpenEats.git
+git clone git@github.com:adaptiman/openeats-api.git
+git clone git@github.com:adaptiman/openeats-web.git
+git clone git@github.com:adaptiman/adapticlaw-edge.git
 cd ~/OpenEats && git checkout mac-mini
 ```
 
@@ -98,7 +98,9 @@ command below, or add `platform: linux/amd64` to the `api`, `web` and `db` servi
 
 ## 5. Rehearsal with yesterday's backup (site stays live on Azure)
 
-Copy the latest backup set from the VM. On the Mac mini:
+Copy the latest backup set from the VM. The commands below assume you sign in to the VM as
+`adaptiman@sweeneydev.southcentralus.cloudapp.azure.com` (the name in the old `env_prod.list`);
+use whatever you normally `ssh` to. On the Mac mini:
 
 ```bash
 mkdir -p ~/cookbook-move
