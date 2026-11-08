@@ -26,9 +26,9 @@ read-only for the family during steps 6 to 9 (about 30 minutes).
    `ipconfig getifaddr en0` shows the current address; System Settings → Network → (interface) →
    Details shows the MAC ("Hardware address"). Restart the Mac mini or renew the lease and check
    it kept the reserved address.
-3. **no-ip.** Make sure your no-ip hostname (for example `something.ddns.net`) tracks your home
+3. **no-ip.** Make sure the no-ip hostname `sweeney-home.servebeer.com` tracks your home
    address: either the router's built-in Dynamic DNS (often under WAN or DDNS settings, provider
-   "No-IP") or no-ip's DUC app on the Mac mini. Check it: `dig +short something.ddns.net` should
+   "No-IP") or no-ip's DUC app on the Mac mini. Check it: `dig +short sweeney-home.servebeer.com` should
    match `curl -s https://api.ipify.org`.
 4. **Check that your ISP lets 443 in** (some block it, or put homes behind shared addresses,
    "CGNAT"). If the router's WAN address differs from `curl -s https://api.ipify.org`, you are
@@ -196,7 +196,7 @@ change anything here during the rehearsal.
 2. **Router:** add a port forward, external **TCP 443** → the Mac mini's reserved address, port
    **443**. Forward nothing else. (If the router has a "DMZ host" setting, leave it off.)
 3. **Bluehost DNS:** change `www.cookbook` and `cookbook` to **CNAME** records pointing at your
-   no-ip hostname (for example `something.ddns.net`). If Bluehost only lets you edit them as A
+   no-ip hostname `sweeney-home.servebeer.com`. If Bluehost only lets you edit them as A
    records, delete those and add CNAMEs.
 4. **Watch the certificates arrive** (a few minutes after DNS updates):
 
