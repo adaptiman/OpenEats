@@ -236,6 +236,12 @@ Home-network note: some routers can't loop back to their own public address, so 
 load from inside the house by name even though it works outside. If that happens, tell Claude; the
 fix is a local DNS entry or the router's "NAT loopback" setting.
 
+**Cutover done 2026-11-08:** both certificates issued (bare name ~19:50, www ~20:13, after Let's
+Encrypt's cached A records expired), site served from the Mac mini. Browsers that used the old
+site may spin on recipes because of the old app's saved offline copy (service worker): clear the
+site's data once (address bar padlock → Site Settings → Delete data). Inside the house the USG
+loops back correctly.
+
 ## 11. Backups on the Mac mini
 
 Every night at **3:15 AM** a LaunchAgent runs `ops/macmini/cookbook_backup_to_azure.sh`:
