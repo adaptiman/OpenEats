@@ -52,12 +52,16 @@ docker run --rm hello-world
 
 ```bash
 cd ~
-git clone git@github.com:adaptiman/OpenEats.git
-git clone git@github.com:adaptiman/openeats-api.git
-git clone git@github.com:adaptiman/openeats-web.git
-git clone git@github.com:adaptiman/adapticlaw-edge.git
+git clone https://github.com/adaptiman/OpenEats.git
+git clone https://github.com/adaptiman/openeats-api.git
+git clone https://github.com/adaptiman/openeats-web.git
+git clone git@github-edge:adaptiman/adapticlaw-edge.git
 cd ~/OpenEats && git checkout mac-mini
 ```
+
+The three OpenEats repos are public, so HTTPS needs no login. `adapticlaw-edge` is private and uses
+its own read-only deploy key (`~/.ssh/adapticlaw-edge`, shortcut `github-edge` in `~/.ssh/config`),
+the same pattern as `github-adapticlaw` for the Nora repo. Done 2026-11-08.
 
 The compose file builds `../openeats-api` and `../openeats-web`, so the three repos sit side by side
 in your home folder.
