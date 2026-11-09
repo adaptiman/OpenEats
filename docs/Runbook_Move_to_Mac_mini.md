@@ -289,6 +289,9 @@ photo_files=<n>` and `=== done`, and the file should show in the portal under th
 container. Run it through `launchctl` as above, not by calling the script over SSH: the Keychain
 is only readable in the logged-in session.
 
+**Installed and first upload succeeded 2026-11-08** (token `cookbook-backup-sas`, `sp=acwl`, expires
+2027-11-08; the portal's default token is Read-only and gets a 403, so untick Read).
+
 ### 11d. Test a restore (once, then after any change)
 
 This decrypts the newest local copy and loads it into a throwaway database, without touching the
