@@ -102,13 +102,23 @@ command below, or add `platform: linux/amd64` to the `api`, `web` and `db` servi
 
 ## 5. Rehearsal with yesterday's backup (site stays live on Azure)
 
-Copy the latest backup set from the VM. The commands below assume you sign in to the VM as
-`adaptiman@sweeneydev.southcentralus.cloudapp.azure.com` (the name in the old `env_prod.list`);
-use whatever you normally `ssh` to. On the Mac mini:
+Copy the latest backup set from the VM. The Mac mini signs in to the VM (`adaptiman@20.1.138.24`;
+passwords are off) with its own key `~/.ssh/cookbook-vm`, whose public half is in the VM's
+`~/.ssh/authorized_keys`, through this shortcut in `~/.ssh/config` (set up 2026-11-08):
+
+```
+Host cookbook-vm
+  HostName 20.1.138.24
+  User adaptiman
+  IdentityFile ~/.ssh/cookbook-vm
+  IdentitiesOnly yes
+```
+
+On the Mac mini:
 
 ```bash
 mkdir -p ~/cookbook-move
-ssh adaptiman@sweeneydev.southcentralus.cloudapp.azure.com \
+ssh cookbook-vm \
   'ls -1dt ~/thesweeneyscookbooksa/openeats-backups/* | head -n1'
 ```
 
@@ -116,8 +126,8 @@ That prints the newest backup folder. Copy its database dump and photos:
 
 ```bash
 B=<the folder it printed>
-scp adaptiman@sweeneydev.southcentralus.cloudapp.azure.com:"$B/db/openeats.sql" ~/cookbook-move/
-scp -r adaptiman@sweeneydev.southcentralus.cloudapp.azure.com:"$B/site-media" ~/cookbook-move/
+scp cookbook-vm:"$B/db/openeats.sql" ~/cookbook-move/
+scp -r cookbook-vm:"$B/site-media" ~/cookbook-move/
 ```
 
 Then follow steps 7 and 8 with these files. When the site works on http://localhost:8088, the
@@ -128,7 +138,7 @@ rehearsal is done. Leave it running; step 7 starts again from an empty database.
 Tell the family not to add or edit recipes for half an hour. On the VM:
 
 ```bash
-ssh adaptiman@sweeneydev.southcentralus.cloudapp.azure.com
+ssh cookbook-vm
 cd ~/OpenEats
 docker exec openeats-db-1 sh -c 'exec mysqldump openeats -uroot -p"$MYSQL_ROOT_PASSWORD"' > ~/openeats-final.sql
 docker cp openeats-api-1:/code/site-media ~/site-media-final
@@ -143,8 +153,8 @@ Copy them to the Mac mini:
 
 ```bash
 cd ~/cookbook-move
-scp adaptiman@sweeneydev.southcentralus.cloudapp.azure.com:openeats-final.sql .
-scp adaptiman@sweeneydev.southcentralus.cloudapp.azure.com:site-media-final.tgz .
+scp cookbook-vm:openeats-final.sql .
+scp cookbook-vm:site-media-final.tgz .
 tar -xzf site-media-final.tgz && rm -rf site-media && mv site-media-final site-media
 ```
 
