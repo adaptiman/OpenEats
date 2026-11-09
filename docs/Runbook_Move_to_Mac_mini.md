@@ -318,6 +318,9 @@ The recipe count should match the site, and the photo count should match `photo_
 manifest. (The `key.txt` step reads the private key from the Keychain, so run it in a Terminal on
 the Mac mini, not over SSH, and it is deleted straight after use.)
 
+**Restore test passed 2026-11-08:** 411 recipes, 257 photo files (the `wc -l` count is higher because it
+also counts folders).
+
 To restore for real, load `openeats.sql` and the photos into the live stack the same way as step 7
 (empty database, import, `docker compose cp` the unpacked `site-media`).
 
