@@ -193,8 +193,9 @@ change anything here during the rehearsal.
    docker compose up -d
    ```
 
-2. **Router:** add a port forward, external **TCP 443** → the Mac mini's reserved address, port
-   **443**. Forward nothing else. (If the router has a "DMZ host" setting, leave it off.)
+2. **Router:** in UniFi (Network 10, USG-3P), turn on the paused port-forward rule **HTTPS to Mac
+   mini (Caddy)**: external TCP 443 to `192.168.1.10`, port 443 (Settings → Policy Engine → Policy
+   Table, or Settings → Routing → Port Forwarding). Forward nothing else, no DMZ host.
 3. **Bluehost DNS:** change `www.cookbook` and `cookbook` to **CNAME** records pointing at your
    no-ip hostname `sweeney-home.servebeer.com`. If Bluehost only lets you edit them as A
    records, delete those and add CNAMEs.
