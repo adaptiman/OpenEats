@@ -238,20 +238,88 @@ fix is a local DNS entry or the router's "NAT loopback" setting.
 
 ## 11. Backups on the Mac mini
 
-Daily, keep 14 days (Claude will add this to the Mac mini's existing nightly backup so it also
-goes to Azure Blob, encrypted). For now, a manual backup is:
+Every night at **3:15 AM** a LaunchAgent runs `ops/macmini/cookbook_backup_to_azure.sh`:
+
+1. dumps the `openeats` database from the running `db` container (`mariadb-dump`, no downtime);
+2. packs the recipe photos (`site-media`) from the `api` container;
+3. puts both, with a small `MANIFEST.txt`, into one archive and encrypts it with **age**, using the
+   same public key as the OpenClaw backup (the private key is the Keychain item
+   `openclaw-backup-age-key` plus the copy in your password manager; only restores need it);
+4. uploads it to the private container **`cookbook`** in storage account `stadapticlawbkp39847`;
+5. keeps the newest **14** encrypted copies in `~/adapticlaw-data/cookbook-backups`.
+
+Log: `~/adapticlaw-data/logs/cookbook-backup-<year-month>.log`.
+
+### 11a. Upload token for the `cookbook` container (once)
+
+In the Azure portal: storage account `stadapticlawbkp39847` → **Containers** → `cookbook` →
+**Shared access tokens**. Signing method **Account key**; permissions **Add, Create, Write, List**
+only (no Read, no Delete); expiry about 12 months; **HTTPS only**. Click **Generate SAS token and
+URL** and copy the **Blob SAS token** (not the URL). Then on the Mac mini:
 
 ```bash
-mkdir -p ~/adapticlaw-data/cookbook-backups/$(date +%F)
-cd ~/OpenEats && set -a && source env_macmini.list && set +a
-docker compose -f docker-compose.macmini.yml exec -T db \
-  sh -c 'exec mariadb-dump openeats -uroot -p"$MYSQL_ROOT_PASSWORD"' \
-  > ~/adapticlaw-data/cookbook-backups/$(date +%F)/openeats.sql
-docker compose -f docker-compose.macmini.yml cp api:/code/site-media ~/adapticlaw-data/cookbook-backups/$(date +%F)/
+security unlock-keychain ~/Library/Keychains/login.keychain-db
+read -rs 'T?Paste SAS token: '
+echo ${#T}
+security add-generic-password -U -a adapticlaw -s cookbook-backup-sas -w "$T"; unset T
 ```
 
-Caddy's certificates live in the `edge_caddy-data` volume; they renew themselves and can be
-re-issued if lost, so they need no backup.
+The length should be over 130. (Don't use the `-w` prompt form: it cuts input at 127 characters.)
+Put the expiry date in your calendar; renew the same way.
+
+### 11b. Lifecycle rule (once)
+
+Storage account → **Data management → Lifecycle management → Add a rule**: name
+`delete-old-cookbook-backups`, blob type **Block blobs**, then **Filter set** with prefix
+`cookbook/` (that matches the whole `cookbook` container), and **Delete the blob** if it was
+created more than **60** days ago.
+
+### 11c. Install the nightly job
+
+```bash
+cd ~/OpenEats && git pull
+cp ops/macmini/ai.adapticlaw.cookbook-backup.plist ~/Library/LaunchAgents/
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/ai.adapticlaw.cookbook-backup.plist
+launchctl kickstart -k gui/$(id -u)/ai.adapticlaw.cookbook-backup     # run once now
+sleep 60; tail -5 ~/adapticlaw-data/logs/cookbook-backup-$(date +%Y-%m).log
+```
+
+The log should end with `uploaded cookbook-backup-<stamp>.tar.gz.age (<bytes> bytes);
+photo_files=<n>` and `=== done`, and the file should show in the portal under the `cookbook`
+container. Run it through `launchctl` as above, not by calling the script over SSH: the Keychain
+is only readable in the logged-in session.
+
+### 11d. Test a restore (once, then after any change)
+
+This decrypts the newest local copy and loads it into a throwaway database, without touching the
+live site:
+
+```bash
+mkdir -p ~/cookbook-restore-test && cd ~/cookbook-restore-test
+security find-generic-password -a adapticlaw -s openclaw-backup-age-key -w > key.txt && chmod 600 key.txt
+LATEST=$(ls -1t ~/adapticlaw-data/cookbook-backups/cookbook-backup-*.age | head -1)
+age -d -i key.txt -o restore.tar.gz "$LATEST" && rm key.txt
+tar -xzf restore.tar.gz && cat MANIFEST.txt
+docker run -d --name cookbook-restore-test -e MARIADB_ROOT_PASSWORD=restoretest \
+  -e MARIADB_DATABASE=openeats mariadb@sha256:b3af559fc38e013c50dd5b5993bfbbb21125c1a62d976b3b0a14d9c4acaae578 \
+  --character-set-server=latin1 --collation-server=latin1_swedish_ci --sql-mode=
+sleep 20
+docker exec -i cookbook-restore-test mariadb -uroot -prestoretest openeats < openeats.sql
+docker exec cookbook-restore-test mariadb -uroot -prestoretest openeats -e "select count(*) as recipes from recipe_recipe;"
+tar -tzf site-media.tar.gz | wc -l
+docker rm -f cookbook-restore-test
+cd ~ && rm -rf ~/cookbook-restore-test
+```
+
+The recipe count should match the site, and the photo count should match `photo_files` in the
+manifest. (The `key.txt` step reads the private key from the Keychain, so run it in a Terminal on
+the Mac mini, not over SSH, and it is deleted straight after use.)
+
+To restore for real, load `openeats.sql` and the photos into the live stack the same way as step 7
+(empty database, import, `docker compose cp` the unpacked `site-media`).
+
+Caddy's certificates live in the `edge_caddy-data` volume; they renew themselves and are re-issued
+if lost, so they need no backup.
 
 ## 12. After a week: retire the VM
 

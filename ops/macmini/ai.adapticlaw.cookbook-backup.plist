@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Nightly cookbook backup at 3:15 AM. Install:
+     cp ~/OpenEats/ops/macmini/ai.adapticlaw.cookbook-backup.plist ~/Library/LaunchAgents/
+     launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/ai.adapticlaw.cookbook-backup.plist -->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>ai.adapticlaw.cookbook-backup</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/adaptiman/OpenEats/ops/macmini/cookbook_backup_to_azure.sh</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>3</integer>
+    <key>Minute</key>
+    <integer>15</integer>
+  </dict>
+  <key>RunAtLoad</key>
+  <false/>
+  <key>StandardOutPath</key>
+  <string>/Users/adaptiman/adapticlaw-data/logs/cookbook-backup-launchd.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/adaptiman/adapticlaw-data/logs/cookbook-backup-launchd.log</string>
+</dict>
+</plist>
