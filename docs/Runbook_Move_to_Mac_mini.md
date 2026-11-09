@@ -134,6 +134,9 @@ scp -r cookbook-vm:"$B/site-media" ~/cookbook-move/
 Then follow steps 7 and 8 with these files. When the site works on http://localhost:8088, the
 rehearsal is done. Leave it running; step 7 starts again from an empty database.
 
+**Rehearsal done 2026-11-08** with backup `20261109T002627Z`: images built natively on ARM, the site
+worked on http://localhost:8088 with all recipes and photos.
+
 ## 6. Freeze the site and take the final backup (on the day)
 
 Tell the family not to add or edit recipes for half an hour. On the VM:
