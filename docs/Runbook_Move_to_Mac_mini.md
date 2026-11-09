@@ -102,13 +102,14 @@ command below, or add `platform: linux/amd64` to the `api`, `web` and `db` servi
 
 ## 5. Rehearsal with yesterday's backup (site stays live on Azure)
 
-Copy the latest backup set from the VM. The Mac mini signs in to the VM (`adaptiman@20.1.138.24`;
-passwords are off) with its own key `~/.ssh/cookbook-vm`, whose public half is in the VM's
+Copy the latest backup set from the VM. The Mac mini signs in to the VM (`adaptiman@20.1.138.24`, SSH on port
+2323; passwords are off) with its own key `~/.ssh/cookbook-vm`, whose public half is in the VM's
 `~/.ssh/authorized_keys`, through this shortcut in `~/.ssh/config` (set up 2026-11-08):
 
 ```
 Host cookbook-vm
   HostName 20.1.138.24
+  Port 2323
   User adaptiman
   IdentityFile ~/.ssh/cookbook-vm
   IdentitiesOnly yes
